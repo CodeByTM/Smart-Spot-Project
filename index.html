@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SmartSpot Control Panel</title>
+
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f0f0;
+    padding: 20px;
+    }
+
+    h1 {
+    margin-top: 0;
+    }
+
+    .container {
+    display: inline-block;
+    vertical-align: top;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #e0e0e0;
+    margin: 10px;
+    }
+
+    .camera-container {
+    display: inline-block;
+    width: 50%;
+    background-color: #c0c0c0;
+    border-radius: 8px;
+    padding: 20px;
+    }
+
+    #video {
+    width: 100%;
+    border-radius: 8px;
+    }
+
+    .button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 10px;
+    cursor: pointer;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    }
+
+    .open-button {
+    background-color: green;
+    }
+
+    .close-button {
+    background-color: red;
+    }
+
+    .screenshot-button {
+    background-color: blue;
+    }
+
+    .end-button {
+    background-color: grey;
+    margin-top: 20px;
+    }
+    </style>
+
+</head>
+
+<body>
+
+
+<h1>SmartSpot Control Panel</h1>
+<div class="camera-container">
+    <h2>Camera Feed</h2>
+    <img id="video" src="{{ url_for('video_feed') }}">
+    <br>
+    <button class="button screenshot-button" onclick="saveScreenshot()">Save Screenshot</button>
+</div>
+<div class="container">
+    <h2>Gate Control</h2>
+    <p id="passcode-status">Passcode status: Waiting for input...</p>
+    <br>
+    <button class="button open-button" onclick="openGate()">Open Gate</button>
+    <button class="button close-button" onclick="closeGate()">Close Gate</button>
+</div>
+<div class="container">
+    <h2>Parking Lot Capacity</h2>
+    <p id="available-spots">Available spots: Loading...</p>
+    <br>
+    <button class="button end-button" onclick="endProgram()">End Program</button>
+</div>
+<script>
+
+function updateStatus() {
+    fetch('/status')
+    .then(response => response.json())
+    .then(data => {
+    document.getElementById('available-spots').innerText = `Available spots: ${data.available_spots}`;
+    document.getElementById('passcode-status').innerText = `Passcode status: ${data.passcode_status}`;
+    });
+
+
+}
+
+function openGate() {
+    fetch('/operator_open_gate', { method: 'POST' })
+    .then(() => updateStatus());
+}
+
+
+function closeGate() {
+    fetch('/operator_close_gate', { method: 'POST' })
+    .then(() => updateStatus());
+}
+
+
+function saveScreenshot() {
+    fetch('/save_screenshot', { method: 'POST' })
+    .then(response => response.text())
+    .then(message => alert(message));
+}
+
+function endProgram() {
+    fetch('/end_program', { method: 'POST' })
+    .theN(() => alert("Program ended"));
+}
+
+setInterval(updateStatus, 5000); // Update status every 5 seconds
+updateStatus(); // Initial status update
+</script>
+</body>
+</html>
+
